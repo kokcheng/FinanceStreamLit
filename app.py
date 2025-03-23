@@ -32,7 +32,7 @@ st.title("Stock Analysis App")
 
 # Sidebar for user input
 st.sidebar.header("Stock Selection")
-ticker = st.sidebar.text_input("Enter Stock Ticker:", "AAPL")
+ticker = st.sidebar.text_input("Enter Stock Ticker:", "CFA.SI")
 period = st.sidebar.selectbox("Select Data Period:", ["1mo", "3mo", "6mo", "1y", "2y", "5y"], index=2)
 
 if st.sidebar.button("Download Data"):

@@ -38,6 +38,18 @@ def load_stock_data():
         return pd.read_csv(DATA_FILE, index_col=0, parse_dates=True)
     return None
 
+
+def plot_bollinger_bands(df):
+    fig, ax = plt.subplots()
+    ax.plot(df.index, df["Close"], label="Close Price", color="black")
+    ax.plot(df.index, df["BB_High"], label="BB High", color="red")
+    ax.plot(df.index, df["BB_Mid"], label="BB Mid", color="blue")
+    ax.plot(df.index, df["BB_Low"], label="BB Low", color="green")
+    ax.set_ylabel("Close Price")
+    ax.legend()
+    return fig
+
+
 # Streamlit UI
 st.title("Stock Analysis")
 
@@ -54,6 +66,9 @@ if st.sidebar.button("Download Data"):
 # Load saved stock data
 df = load_stock_data()
 if df is not None:
+    if "stock_data" not in st.session_state:
+        st.session_state.stock_data = df
+
     st.subheader("Stock Data")
     st.dataframe(df.tail())
 
@@ -102,7 +117,11 @@ if df is not None:
 
     st.pyplot(fig2)
 
+    st.subheader("Bollinger Bands")
+    st.text("Bollinger Bands are a type of statistical chart characterizing the prices and volatility over time of a financial instrument or commodity, using a formulaic method propounded by John Bollinger in the 1980s.")
 
+    fig3 = plot_bollinger_bands(df)
+    st.pyplot(fig3)
 
 else:
     st.warning("No stock data found. Please download stock data first.")

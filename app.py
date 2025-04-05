@@ -6,8 +6,15 @@ import os
 import ta  # Technical Analysis Library
 import matplotlib.pyplot as plt
 
+
+
 # File to save stock data
 DATA_FILE = "stock_data.csv"
+
+def get_stock_selection():
+    # read stock selection from an excel file with two columns: stock_ticker and stock_name
+    stock_selection = pd.read_excel("stock_selection.xlsx")
+    return stock_selection
 
 # Function to fetch stock data
 def fetch_stock_data(ticker, period="6mo", interval="1d"):
@@ -51,11 +58,21 @@ def plot_bollinger_bands(df):
 
 
 # Streamlit UI
-st.title("Stock Analysis")
 
 # Sidebar for user input
 st.sidebar.header("Stock Selection")
-ticker = st.sidebar.selectbox("Select Stock Ticker:", ["VWRA.L", "AAPL", "CFA.SI"])
+
+# Load stock selection
+stock_selection = get_stock_selection()
+stock_tickers = stock_selection["stock_ticker"].tolist()
+stock_names = stock_selection["stock_name"].tolist()
+
+# Select stock ticker
+ticker = st.sidebar.selectbox("Select Stock Ticker:", stock_tickers, index=0)
+# display stock name
+stock_name = stock_names[stock_tickers.index(ticker)]
+
+st.title(f"Stock Name: {stock_name}")
 
 period = st.sidebar.selectbox("Select Data Period:", ["1mo", "3mo", "6mo", "1y", "2y", "5y"], index=2)
 
@@ -66,18 +83,37 @@ if st.sidebar.button("Download Data"):
 # Load saved stock data
 df = load_stock_data()
 if df is not None:
-    if "stock_data" not in st.session_state:
+    # check if the stock data is already in session state or data changed
+    if "stock_data" in st.session_state:
+        st.write("add stock data to session state")
         st.session_state.stock_data = df
 
-    st.subheader("Stock Data")
-    st.dataframe(df.tail())
 
+    st.subheader("Last 10 days of stock data")
+    # last 10 rows of stock data in reverse order
+    st.dataframe(df.tail(10)[::-1])
+    '''
     # RSI Calculation
     df = calculate_rsi(df)
 
     df = calculate_macd(df)
 
     df = calculate_bollinger_bands(df)
+
+    # display RSI value in table
+    st.subheader("RSI Value")
+    st.dataframe(df[["RSI", "MACD", "Signal_Line", "MACD_Hist"]].tail(5))
+
+    # plot the MACD Histogram
+    st.subheader("MACD Histogram")
+    st.write("Positive Histogram implies bullish momentum, while Negative Histogram implies bearish momentum.")
+    
+    fig1, ax = plt.subplots()
+    ax.bar(df.index, df["MACD_Hist"], label="MACD Histogram", color="grey")
+    ax.axhline(0, linestyle="--", color="black")
+    ax.set_ylabel("MACD Histogram")
+    ax.legend()
+    st.pyplot(fig1)
 
     # Plot RSI
     st.subheader("RSI/ MACD")
@@ -101,8 +137,8 @@ if df is not None:
     buy_signals = (df["RSI"] < 30)
     sell_signals = (df["RSI"] > 70)
     '''
-    buy_signals = (df["RSI"] < 30) & (df["MACD"] > df["Signal_Line"])
-    sell_signals = (df["RSI"] > 70) & (df["MACD"] < df["Signal_Line"])
+    #buy_signals = (df["RSI"] < 30) & (df["MACD"] > df["Signal_Line"])
+    #sell_signals = (df["RSI"] > 70) & (df["MACD"] < df["Signal_Line"])
     '''
     df["Buy_Signal"] = np.where(buy_signals, 1, 0)
     df["Sell_Signal"] = np.where(sell_signals, 1, 0)
@@ -122,7 +158,7 @@ if df is not None:
 
     fig3 = plot_bollinger_bands(df)
     st.pyplot(fig3)
-
+    '''
 else:
     st.warning("No stock data found. Please download stock data first.")
 

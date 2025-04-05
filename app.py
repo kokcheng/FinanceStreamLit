@@ -13,7 +13,11 @@ DATA_FILE = "stock_data.csv"
 
 def get_stock_selection():
     # read stock selection from an excel file with two columns: stock_ticker and stock_name
-    stock_selection = pd.read_excel("stock_selection.xlsx")
+    #stock_selection = pd.read_excel("stock_selection.xlsx")
+    stock_selection = pd.DataFrame({
+        "stock_ticker": ["VWRA.L", "CFA.SI", "AAPL"],
+        "stock_name": ["Vanguard FTSE All-World UCITS ET", "NikkoAM-StraitsTrading Asia ex Japan REIT ETF", "Apple Inc"]
+    })
     return stock_selection
 
 # Function to fetch stock data

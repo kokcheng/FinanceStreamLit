@@ -3,6 +3,17 @@ import streamlit as st
 # import the calculate_rsi function from the utility module
 from util.rsi_util import calculate_rsi, plot_rsi, plot_rsi_with_signals, plot_rsi_divergence, plot_rsi_trendline
 
+is_data_loaded = False
+df = None
+stock_name = None
+if "stock_data" not in st.session_state:
+    st.session_state.stock_data = None
+    is_data_loaded = False
+else:
+    df = st.session_state.stock_data
+    stock_name = st.session_state.stock_name
+    is_data_loaded = True
+
 st.title("RSI")
 st.write("""
 #### RSI Formula
@@ -11,12 +22,26 @@ where\n
 𝑅𝑆 = Average Gain over 𝑛 periods/Average Loss over 𝑛 periods
  
 The default period n is 14. RSI values range from 0 to 100.
+""")
 
+if is_data_loaded:
+    st.subheader("Stock Data - " + stock_name)
+    df = calculate_rsi(df)
+    st.dataframe(df.tail())
+
+st.write("""
 #### RSI Interpretation
 - Above 70 → Overbought (possible price correction or reversal)
 - Below 30 → Oversold (potential buying opportunity)
 - Between 30-70 → Neutral zone (no clear trend)
+""")
 
+if is_data_loaded:
+    st.subheader("RSI with Buy/Sell Signals")
+    fig2 = plot_rsi_with_signals(df)
+    st.pyplot(fig2)
+
+st.write("""
 #### Trading Strategies Using RSI
 1) Overbought & Oversold Levels
 - If RSI > 70, consider selling (price may drop).
@@ -41,18 +66,14 @@ else:
     df = st.session_state.stock_data
     st.write("Stock data loaded successfully.")
     if df is not None:
+        stock_name = st.session_state.stock_name
 
-        st.subheader("Stock Data")
-        df = calculate_rsi(df)
-        st.dataframe(df.tail())
 
         st.subheader("RSI Plot")
         fig = plot_rsi(df)
         st.pyplot(fig)
 
-        st.subheader("RSI with Buy/Sell Signals")
-        fig2 = plot_rsi_with_signals(df)
-        st.pyplot(fig2)
+
 
         st.subheader("RSI Divergence Plot")
         fig3 = plot_rsi_divergence(df)

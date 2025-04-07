@@ -6,6 +6,8 @@ import os
 import ta  # Technical Analysis Library
 import matplotlib.pyplot as plt
 
+from util.stock_util import get_stock_info
+from util.stock_util import plot_stock_data
 
 
 # File to save stock data
@@ -86,83 +88,42 @@ if st.sidebar.button("Download Data"):
 
 # Load saved stock data
 df = load_stock_data()
+info = get_stock_info(ticker)
+if info is not None:
+    # Display stock information
+    st.subheader("Stock Information")
+    st.write(f"**Fifty Week Range:** {info['fiftyTwoWeekRange']}")
+    if "yield" in info:
+        st.write(f"**Dividend Yield:** {info['yield']}")
+
+    st.write(f"**Trailing PE:** {info['trailingPE']}")
+    # format the volume to be in millions
+    if "volume" in info:
+        info["volume"] = info["volume"] / 1_000_000
+        info["volume"] = f"{info['volume']:.2f}M"
+    else:
+        info["volume"] = "N/A"
+    st.write(f"**Volume:** {info['volume']}")
+    st.write(f"**200 days average:** {info['twoHundredDayAverage']}")
+else:
+    st.sidebar.warning("No stock information found. Please check the ticker.")
+
 if df is not None:
     # check if the stock data is already in session state or data changed
     if "stock_data" in st.session_state:
         st.write("add stock data to session state")
         st.session_state.stock_data = df
+        st.session_state.stock_name = stock_name
 
 
     st.subheader("Last 10 days of stock data")
     # last 10 rows of stock data in reverse order
     st.dataframe(df.tail(10)[::-1])
-    '''
-    # RSI Calculation
-    df = calculate_rsi(df)
 
-    df = calculate_macd(df)
-
-    df = calculate_bollinger_bands(df)
-
-    # display RSI value in table
-    st.subheader("RSI Value")
-    st.dataframe(df[["RSI", "MACD", "Signal_Line", "MACD_Hist"]].tail(5))
-
-    # plot the MACD Histogram
-    st.subheader("MACD Histogram")
-    st.write("Positive Histogram implies bullish momentum, while Negative Histogram implies bearish momentum.")
-    
-    fig1, ax = plt.subplots()
-    ax.bar(df.index, df["MACD_Hist"], label="MACD Histogram", color="grey")
-    ax.axhline(0, linestyle="--", color="black")
-    ax.set_ylabel("MACD Histogram")
-    ax.legend()
-    st.pyplot(fig1)
-
-    # Plot RSI
-    st.subheader("RSI/ MACD")
-    fig, ax = plt.subplots()
-    ax.plot(df.index, df["RSI"], label="RSI", color="blue")
-    ax.axhline(70, linestyle="--", color="red")  # Overbought level
-    ax.axhline(30, linestyle="--", color="green")  # Oversold level
-    ax.set_ylabel("RSI Value")
-    ax.legend()
-
-    ax2 = ax.twinx()
-    ax2.plot(df.index, df["MACD"], label="MACD", color="purple")
-    ax2.plot(df.index, df["Signal_Line"], label="Signal Line", color="orange")
-    ax2.set_ylabel("MACD Value")
-    ax2.legend()
+    df = df.transpose()
+    fig  = plot_stock_data(df)
     st.pyplot(fig)
-    # Indicate buy/sell signals
-    st.subheader("Buy/ Sell Signals")
 
-    # buy/sell signals based on RSI only
-    buy_signals = (df["RSI"] < 30)
-    sell_signals = (df["RSI"] > 70)
-    '''
-    #buy_signals = (df["RSI"] < 30) & (df["MACD"] > df["Signal_Line"])
-    #sell_signals = (df["RSI"] > 70) & (df["MACD"] < df["Signal_Line"])
-    '''
-    df["Buy_Signal"] = np.where(buy_signals, 1, 0)
-    df["Sell_Signal"] = np.where(sell_signals, 1, 0)
-
-    # create a new figure for buy/sell signals
-    fig2, ax = plt.subplots()
-    ax.plot(df.index, df["Close"], label="Close Price", color="black")
-    ax.scatter(df.index, df["Buy_Signal"] * df["Close"], label="Buy Signal", marker="^", color="green")
-    ax.scatter(df.index, df["Sell_Signal"] * df["Close"], label="Sell Signal", marker="v", color="red")
-    ax.set_ylabel("Close Price")
-    ax.legend()
-
-    st.pyplot(fig2)
-
-    st.subheader("Bollinger Bands")
-    st.text("Bollinger Bands are a type of statistical chart characterizing the prices and volatility over time of a financial instrument or commodity, using a formulaic method propounded by John Bollinger in the 1980s.")
-
-    fig3 = plot_bollinger_bands(df)
-    st.pyplot(fig3)
-    '''
 else:
     st.warning("No stock data found. Please download stock data first.")
 

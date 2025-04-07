@@ -2,6 +2,7 @@
 # function download stock data from yfinance given a ticker
 import yfinance as yf
 import pandas as pd
+import matplotlib.pyplot as plt
 
 # function to download stock data from yfinance given a list of tickers
 def download_stock_data_list(tickers, period="6mo", interval="1d"):
@@ -68,9 +69,64 @@ def download_stock_data(ticker, period="6mo", interval="1d"):
         return None
 
 
+# get stock information from yfinance given a ticker
+def get_stock_info(ticker):
+    """
+    Get stock information from yfinance given a ticker.
+
+    Parameters:
+    ticker (str): Stock ticker symbol.
+
+    Returns:
+    dict: Dictionary containing stock information.
+    """
+    try:
+        stock = yf.Ticker(ticker)
+        info = stock.info
+        return info
+    except Exception as e:
+        print(f"Error fetching info for {ticker}: {e}")
+        return None
+
+def plot_stock_data(data):
+    """
+    Plot stock data.
+
+    Parameters:
+    data (pd.DataFrame): DataFrame containing stock data.
+
+    Returns:
+    fig: Figure object containing the plot.
+    """
+    fig, ax = plt.subplots(figsize=(10, 5))
+    # plot the Close price for each ticker
+    for ticker in data.columns:
+        ax.plot(data.index, data[ticker], label=ticker)
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Closing Price")
+    ax.set_title("Stock Prices")
+    ax.legend()
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    return fig
+    
+
+
 if __name__ == "__main__":
     # Example usage
-    ticker = "AAPL"
+    ticker = "CFA.SI"
+    info = get_stock_info(ticker)
+    if info is not None:
+        print(f"Info for {ticker}:")
+        # print in key-value pair format
+        for key, value in info.items():
+            print(f"{key}: {value}")
+
+
+    else:
+        print("Failed to fetch stock info.")
+
+    '''
     data = download_stock_data(ticker, period="7d", interval="1d")
     if data is not None:
         print(data.head())
@@ -86,3 +142,4 @@ if __name__ == "__main__":
             print(df.head())
     else:
         print("Failed to download stock data.")
+    '''

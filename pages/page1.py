@@ -3,6 +3,8 @@ import streamlit as st
 st.title("Page 1")
 st.write("This is Page 1.")
 
+
+
 if "stock_data" not in st.session_state:
     #st.session_state.stock_data = None
     st.write("No stock data loaded yet.")

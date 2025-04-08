@@ -17,8 +17,8 @@ def get_stock_selection():
     # read stock selection from an excel file with two columns: stock_ticker and stock_name
     #stock_selection = pd.read_excel("stock_selection.xlsx")
     stock_selection = pd.DataFrame({
-        "stock_ticker": ["VWRA.L", "CFA.SI", "AAPL"],
-        "stock_name": ["Vanguard FTSE All-World UCITS ET", "NikkoAM-StraitsTrading Asia ex Japan REIT ETF", "Apple Inc"]
+        "stock_ticker": ["VWRA.L", "CFA.SI", "AAPL", "NVDA", "AMZN", "D05.SI", "O39.SI", "U11.SI"],
+        "stock_name": ["Vanguard FTSE All-World UCITS ET", "NikkoAM-StraitsTrading Asia ex Japan REIT ETF", "Apple Inc", "NVIDIA Corporation", "Amazon.com Inc", "DBS Group Holdings Ltd", "Oversea-Chinese Banking Corporation Limited", "United Overseas Bank Limited"]
     })
     return stock_selection
 
@@ -120,8 +120,17 @@ if df is not None:
     # last 10 rows of stock data in reverse order
     st.dataframe(df.tail(10)[::-1])
 
-    df = df.transpose()
-    fig  = plot_stock_data(df)
+    # plot a candle stick chart
+    st.subheader("Stock Price Chart")
+    # plot only the Close price
+    df = df[["Close"]]
+    fig = plot_stock_data(df)
+    st.pyplot(fig)
+
+    df = calculate_bollinger_bands(df)
+    st.subheader("Bollinger Bands")
+    # plot the Bollinger Bands
+    fig = plot_bollinger_bands(df)
     st.pyplot(fig)
 
 else:

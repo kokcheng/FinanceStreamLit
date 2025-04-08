@@ -66,6 +66,7 @@ def plot_bollinger_bands(df):
 # Streamlit UI
 
 # Sidebar for user input
+st.sidebar.write("v1.0.0")
 st.sidebar.header("Stock Selection")
 
 # Load stock selection
